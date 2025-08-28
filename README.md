@@ -60,3 +60,19 @@ Phase 6: Pro Edition (Analyzer, Portability Score)
 
  See docs/axiom_os_roadmap_visual.pdf
  for details.
+
+  Known Limitations (v0)
+
+Simple text-based replacements (no syntax analysis).
+
+Covers only a subset of the CUDA runtime API.
+
+Libraries (cuBLAS/cuDNN) not handled yet.
+
+Performance is not the goal of this PoC.
+
+ License
+
+MIT — free to use, modify, and redistribute.
+
+ With this PoC, AXIOM OS takes its first concrete step toward becoming the universal AI operating system — the Windows of AI middleware.

@@ -17,6 +17,13 @@ from collections import Counter
 
 # --- mappings: extend runtime coverage a bit ---
 CUDA_TO_HIP = {
+      r'\bcudaMemset\b'              : 'hipMemset',
+    r'\bcudaPeekAtLastError\b'     : 'hipPeekAtLastError',
+    r'\bcudaGetDeviceCount\b'      : 'hipGetDeviceCount',
+    r'\bcudaSetDevice\b'           : 'hipSetDevice',
+    r'\bcudaStreamCreateWithFlags\b': 'hipStreamCreateWithFlags',
+    r'\bcudaEventElapsedTime\b'    : 'hipEventElapsedTime',
+
     r'#\s*include\s*<cuda_runtime\.h>': '#include <hip/hip_runtime.h>',
 
     r'\bcudaMalloc\b'              : 'hipMalloc',

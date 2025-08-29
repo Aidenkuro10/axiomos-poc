@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-AXIOMify v0.3 — CUDA -> HIP translator with compatibility report
+AXIOMify v0.3.1 — CUDA -> HIP translator with compatibility report
 - Single file or whole directory
 - --inplace support
-- Simple coverage report
+- Simple coverage report (fixed)
 
 Usage examples:
   # Report only (no file written)
@@ -89,15 +89,16 @@ def compatibility_report(src_text: str, dst_text: str):
     Compute a simple coverage report:
       - seen: Counter of all cuda* tokens in source
       - uncovered: list[(token, count)] of those not covered by our mapping
+
+    FIX: extract covered tokens from mapping patterns without word-boundary confusion.
     """
     seen = Counter(CUDA_TOKEN_PATTERN.findall(src_text))
 
     # tokens considered "covered" (derived from our mapping keys)
     covered_tokens = set()
     for pat in CUDA_TO_HIP.keys():
-        m = re.findall(r'\b(cuda[A-Za-z_0-9]*)\b', pat)
-        # collect all cuda* tokens present in mapping patterns
-        for tok in m:
+        # look for raw 'cuda...' substrings inside the pattern string itself
+        for tok in re.findall(r'cuda[A-Za-z_0-9]*', pat):
             covered_tokens.add(tok)
 
     uncovered = [(tok, cnt) for tok, cnt in seen.items() if tok not in covered_tokens]

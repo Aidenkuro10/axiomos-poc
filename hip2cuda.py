@@ -1,4 +1,3 @@
-%%writefile hip2cuda.py
 import re, sys, pathlib
 
 def hip_to_cuda(text: str) -> str:

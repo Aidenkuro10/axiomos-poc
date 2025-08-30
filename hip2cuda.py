@@ -1,7 +1,6 @@
 import re, sys, pathlib
 
 def hip_to_cuda(text: str) -> str:
-    # Remplacements fonctions + constantes
     text = (text
         .replace("#include <hip/hip_runtime.h>", "#include <cuda_runtime.h>")
         .replace("hipMalloc", "cudaMalloc")
@@ -15,8 +14,6 @@ def hip_to_cuda(text: str) -> str:
         .replace("hipPeekAtLastError", "cudaPeekAtLastError")
         .replace("hipGetErrorString", "cudaGetErrorString")
     )
-
-    # hipLaunchKernelGGL(...) -> kernel<<<dim3(G), dim3(B)>>>(args);
     pat = re.compile(
         r'hipLaunchKernelGGL\(\s*([A-Za-z_]\w*)\s*,\s*dim3\(([^)]*)\)\s*,\s*dim3\(([^)]*)\)\s*,\s*[^,]*\s*,\s*[^,]*\s*,\s*(.*?)\)\s*;',
         re.DOTALL
@@ -29,9 +26,9 @@ def main():
         print("Usage: python3 hip2cuda.py input.hip.cpp output.cu")
         sys.exit(1)
     inp, outp = map(pathlib.Path, sys.argv[1:3])
-    src = inp.read_text()
+    src = inp.read_text(encoding="utf-8")
     out = hip_to_cuda(src)
-    outp.write_text(out)
+    outp.write_text(out, encoding="utf-8")
     print(f"[OK] HIP -> CUDA : {inp} -> {outp}")
 
 if __name__ == "__main__":

@@ -1,58 +1,73 @@
-# AXIOM OS — PoC v0.3: CUDA → HIP (AMD ROCm) Translator
+# AXIOM OS — PoC v0.4: CUDA → AXIR → HIP Translator (Universal Pivot)
 
-**Vision**: Free AI from the CUDA lock-in. AXIOM OS is a middleware that enables the same AI code to run across different processors (NVIDIA, AMD, Intel, and more) through automatic translation.
+**Vision**  
+Free AI from the CUDA lock-in.  
+AXIOM OS introduces **AXIR**, a universal intermediate representation that lets the same AI code run across NVIDIA, AMD, Intel, and more.  
+
+CUDA is just the first step: Axiomos is building the **universal AI operating system**, breaking hardware silos and enabling true portability.
 
  Official website: [axiomos.ai](https://axiomos.ai)
 
 ---
 
- About this Repository
+## About this Repository
 
-This repository contains the first Proof of Concept (v0.3) of AXIOM OS:
+This repository contains the **Proof of Concept v0.4** of AXIOM OS.
 
-- **axiomify.py** → a Python script that automatically converts CUDA runtime API calls into their HIP/ROCm equivalents.
-- **examples/** → sample CUDA kernels (vector addition, async/streams).
-- **docs/** → roadmap PDF and visual timeline.
+- `axiomify.py` → Python toolchain with two stages:
+  - **Front-end**: CUDA → AXIR (JSON intermediate representation)
+  - **Back-end**: AXIR → HIP (AMD ROCm), or other targets in the future
+  - Shortcut: `--hip-direct` for CUDA → HIP directly
 
- **Goal of this PoC**: demonstrate that automatic translation from CUDA to HIP is possible, and provide basic coverage & reporting.
+- `hip2cuda.py` → Reverse translator (HIP → CUDA) to run HIP-generated code on NVIDIA GPUs (Colab, local).
+
+- `demo.sh` → End-to-end demo (CUDA → AXIR → HIP → CUDA → Run).
+
+- `examples/` → Sample CUDA kernels (vector addition, async/streams).
+
+- `docs/` → Roadmap PDF and visual timeline.
 
 ---
 
-## Quick Usage
+##  Quick Usage
 
-### 1. Report only (no file written)
+### 1. CUDA → AXIR
 ```bash
-python3 axiomify.py examples/mini_vector_add.cu --report-only
+python3 axiomify.py examples/mini_vector_add.cu --emit-axir -o mini_vector_add.axir.json
 
-2. Translate one file → new file
-python3 axiomify.py examples/mini_vector_add.cu -o mini_vector_add_hip.cpp
+2. AXIR → HIP
+python3 axiomify.py mini_vector_add.axir.json --from-axir -o mini_vector_add_glue.hip.cpp
 
-3. Translate one file in place
-python3 axiomify.py examples/mini_vector_add.cu --inplace
-# generates examples/mini_vector_add.hip.cpp
+3. CUDA → HIP (direct shortcut)
+python3 axiomify.py examples/mini_vector_add.cu --hip-direct -o mini_vector_add_hip.cpp
 
-4. Bulk translate a directory
-python3 axiomify.py ./examples -o ./examples_hip -v
+ Showtime Demo (end-to-end)
 
-Compile & Run
+For the full pipeline (CUDA → AXIR → HIP → back to CUDA → run):
 
-On NVIDIA (CUDA):
-
-nvcc examples/mini_vector_add.cu -o mini_vector_add
-./mini_vector_add
+chmod +x demo.sh
+./demo.sh
 
 
-On AMD (ROCm/HIP):
+This will display:
 
-hipcc mini_vector_add_hip.cpp -o mini_vector_add_hip
-./mini_vector_add_hip
+The original CUDA code
 
+The AXIR pivot JSON
 
-💡 Note: The kernel launch syntax <<<...>>> is generally accepted by HIP, making portability easier.
+The HIP (glue and full)
 
-Repository Structure
+The regenerated CUDA
+
+The final execution result:
+
+Résultat : 11 22 33 44 55
+
+ Repository Structure
 axiomos-poc/
- ├─ axiomify.py
+ ├─ axiomify.py          # CUDA <-> AXIR <-> HIP
+ ├─ hip2cuda.py          # HIP -> CUDA reconversion
+ ├─ demo.sh              # End-to-end demo
  ├─ examples/
  │   ├─ mini_vector_add.cu
  │   ├─ mini_async_copy.cu
@@ -63,13 +78,13 @@ axiomos-poc/
  ├─ LICENSE
  └─ .gitignore
 
-Roadmap (excerpt)
+🗺 Roadmap (excerpt)
 
-Phase 0: CUDA → HIP PoC (this repo) ✅
+Phase 0: CUDA → HIP PoC (regex-based) ✅
 
-Phase 1: Broader API coverage (streams/events, cuBLAS → hipBLAS, cuRAND → hipRAND)
+Phase 1: Broader API coverage (streams/events) ✅
 
-Phase 2: Structured front-end (AST parser, internal IR)
+Phase 2 (v0.4): AXIR intermediate representation introduced ✅
 
 Phase 3: Intel backend (SYCL/oneAPI)
 
@@ -81,19 +96,18 @@ Phase 6: Pro Edition (Analyzer, Portability Score)
 
 See docs/axiom_os_roadmap_visual.pdf for details.
 
-Known Limitations (v0.3)
+⚠️ Known Limitations (v0.4)
 
-Simple text-based replacements (no full syntax analysis).
+AXIR is still minimal (covers malloc, memcpy, kernel launch, sync, free).
 
-Covers only a subset of the CUDA runtime API.
+Only basic CUDA runtime APIs are supported.
 
-Libraries (cuBLAS/cuDNN) not handled yet.
+Libraries (cuBLAS/cuDNN) not yet handled.
 
 Performance optimization is not the goal of this PoC.
 
-License
+ License
 
 MIT — free to use, modify, and redistribute.
 
- With this PoC, AXIOM OS takes its first concrete step toward becoming the universal AI operating system — the Windows of AI middleware.
-
+With this PoC, AXIOM OS takes its first concrete step toward becoming the universal AI operating system — the Windows of AI middleware.
